@@ -1,5 +1,6 @@
 mod app;
 mod ray;
+mod ray_tracer;
 
 use app::App;
 
