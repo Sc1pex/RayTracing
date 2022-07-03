@@ -69,7 +69,25 @@ impl App {
         egui::Color32::from(egui::Rgba::from_rgb(vec.x, vec.y, vec.z))
     }
 
+    fn hit_sphere(center: &Vector3<f32>, raduis: f32, ray: &Ray) -> Option<f32> {
+        let oc = ray.origin - center;
+        let a = cgmath::dot(ray.dir, ray.dir);
+        let half_b = cgmath::dot(oc, ray.dir);
+        let c = cgmath::dot(oc, oc) - raduis * raduis;
+        let disctiminant = half_b * half_b - a * c;
+        if disctiminant < 0. {
+            None
+        } else {
+            Some((-half_b - disctiminant.sqrt()) / a)
+        }
+    }
+
     fn ray_color(ray: &Ray) -> egui::Color32 {
+        if let Some(t) = Self::hit_sphere(&Vector3::new(0., 0., -1.), 0.5, ray) {
+            let n = ray.at(t) - Vector3::new(0., 0., -1.);
+            return Self::vec_to_color(&(0.5 * (Vector3::new(n.x + 1., n.y + 1., n.z + 1.))));
+        }
+
         let unit_dir = ray.dir.normalize_to(1.0);
         let t = 0.5 * (unit_dir.y + 1.);
         let color = (1. - t) * Vector3::new(1.0, 1.0, 1.0) + t * Vector3::new(0.5, 0.7, 1.0);
