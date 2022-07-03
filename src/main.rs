@@ -1,4 +1,5 @@
 mod app;
+mod hittable;
 mod ray;
 mod ray_tracer;
 

@@ -1,4 +1,8 @@
-use crate::ray_tracer::RayTracer;
+use crate::{
+    hittable::{HittableList, Sphere},
+    ray_tracer::RayTracer,
+};
+use cgmath::Vector3;
 use eframe::egui;
 
 pub struct App {
@@ -8,11 +12,19 @@ pub struct App {
     image_aspect_ratio: f32,
 
     ray_tracer: RayTracer,
+    world: HittableList,
 }
 
 impl App {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         cc.egui_ctx.set_visuals(egui::Visuals::dark());
+
+        let mut world = HittableList::new();
+        world.add(Box::new(Sphere::new(0.5, Vector3::<f32>::new(0., 0., -1.))));
+        world.add(Box::new(Sphere::new(
+            100.,
+            Vector3::<f32>::new(0., -100.5, -1.),
+        )));
 
         Self {
             image: None,
@@ -21,13 +33,14 @@ impl App {
             image_aspect_ratio: 1.0,
 
             ray_tracer: RayTracer::new(),
+            world,
         }
     }
 
     fn generate_image(&mut self) -> egui::ColorImage {
         let data = self
             .ray_tracer
-            .generate_image(self.image_width, self.image_height)
+            .generate_image(self.image_width, self.image_height, &self.world)
             .into_iter()
             .map(|x| Into::<egui::Color32>::into(egui::Rgba::from_rgb(x[0], x[1], x[2])).to_array())
             .flatten()
